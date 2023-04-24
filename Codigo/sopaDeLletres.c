@@ -137,7 +137,5 @@ int main() {
 
     genera_sopa(&sopa);     // La generem (exemple)
 
-    mostra_sopa(&sopa);      // La mostrem per pantalla
-
     return 0;
 }
