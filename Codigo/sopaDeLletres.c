@@ -74,7 +74,7 @@ void mostra_sopa (sopa_t *s)
             printf("|%c|", s->lletres[i * s->dim + j]);
 
         }
-        printf("\n");
+        //printf("\n");
     }
 }
 
