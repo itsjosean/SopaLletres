@@ -19,8 +19,9 @@ typedef struct
     int dim;        // Nombre de files = nombre de columnes
     char *lletres;  // Taula amb les lletres
     bool *encertades;   // Les lletres son d'una paraula que s'ha encertat
-    paraula_t par[MAX_PARAULES];    // Les paraules
+    //paraula_t par[MAX_PARAULES];    // Les paraules
     int n_par;  // Nombre de paraules
+    char p[14][12];
     int n_encerts;    // Nombre de paraules encertades
 } sopa_t;
 
@@ -30,35 +31,317 @@ typedef struct
 void genera_sopa(sopa_t *s)
 {
 
-    int midaSopa;
-    bool midaCorrecta;
+    sopa_t s;
+    bool dim_correcte;
 
-    while (!midaCorrecta)
-    {
-        printf("Introdueix la mida de la sopa de lletres:");
-        scanf("%d",&midaSopa);
 
-        if (midaSopa > 0 && midaSopa <= 40)
-        {
-            midaCorrecta = true;
+     printf("Introdueix les dimensions de la sopa de lletres\n");
+
+     scanf("%d", &s.dim);
+
+     dim_correcte = false;
+
+     while (!dim_correcte) {
+     if ((s.dim <= 40)&&(s.dim >= 10)) {
+        dim_correcte = true;
+     }
+
+     else {
+        printf("Introdueix les dimensions de la sopa de lletres\n");
+        scanf("%d", &s.dim);
+     }
+
+     }
+
+     if ((s.dim >= 10)&&(s.dim <= 15)) {
+        s.n_par = 5;
+     }
+
+     else if ((s.dim > 15)&&(s.dim <= 20)) {
+          s.n_par = 6;
+     }
+
+     else if ((s.dim > 20)&&(s.dim <= 25)) {
+          s.n_par = 7;
+     }
+
+     else if ((s.dim > 25)&&(s.dim <= 30)) {
+          s.n_par = 8;
+     }
+
+     else if ((s.dim > 30)&&(s.dim <= 35)) {
+          s.n_par = 9;
+     }
+
+     else if ((s.dim > 35)&&(s.dim <= 40)) {
+          s.n_par = 10;
+     }
+
+
+    char paraula[20];
+    int i;
+    int j;
+    FILE *fit;
+    fit = fopen ("palabras.txt", "r");
+
+    if (fit == NULL)
+     {
+     printf("Error en obrir el fitxer\n");
+     }
+     else
+     {
+
+        i = 0;
+        while (i < s.n_par) {
+
+          fgets(paraula, 80, fit);
+
+          j = 0;
+          while (paraula[j] != '\n') {
+
+               s.p[i][j] = paraula[j];
+
+               j++;
+
+          }
+
+           s.p[i][j] = '\n';
+           s.p[i][j+1] = '\0';
+
+
+          i++;
+
         }
-        else
-        {
-            printf("Aquesta mida no es valida. Torna a probar. (1 - 40)\n");
+
+       fclose(fit);
+
+     }
+
+     i = 0;
+     while (i < s.n_par) {
+        j = 0;
+        while (s.p[i][j] != '\0') {
+            j++;
         }
+        i++;
+     }
+
+    s.lletres = malloc(s.dim * s.dim * sizeof(char));   // Espai per a les lletres
+
+
+      for (i=0; i<s.dim; i++) {
+        for (j=0; j<s.dim; j++) {
+          s.lletres[i*s.dim+j] = '\0';
+        }
+
     }
 
-    s->dim = midaSopa;    // Mida màxima: 40 x 40
-    s->lletres = malloc(s->dim * s->dim * sizeof(char));   // Espai per a les lletres
-    s->encertades = malloc(s->dim * s->dim * sizeof(char)); // Per saber si una lletra correspon a encert
 
-    for (int i = 0; i < s->dim * s->dim; i++)
-    {
-        // Generem una lletra aleatoriament
-        s->lletres[i] = 'A' + (rand() % ('Z'-'A' + 1));
+    srand(time(NULL));
+
+    int i2, j2;
+    int dir;
+    int ll;
+    bool dir_correcte, dir_dreta, dir_avall, dir_esq, dir_amunt;
+    int direccio;
+
+    for (i=0; i<s.n_par; i++) {
+
+    dir_correcte = false;
+
+    while(!dir_correcte) {
+
+    ll = 0;
+    j = 0;
+    while (s.p[i][j] != '\n') {
+        ll++;
+        j++;
     }
 
-    prepararSopaLletres(s);
+    j = 0;
+    i2 = rand() % s.dim;
+    j2 = rand() % s.dim;
+    while ((s.lletres[(i2*s.dim)+j2] != '\0')&&(s.lletres[(i2*s.dim)+j2] != s.p[i][j])) {
+       i2 = rand() % s.dim;
+       j2 = rand() % s.dim;
+    }
+
+
+
+    direccio = rand() % 4;
+
+    if (direccio == 0) {
+
+    dir_dreta = true;
+
+    j = 1;
+    dir = 1;
+    while ((dir_dreta)&&(s.p[i][j] != '\n')) {                 // Comprovem per la direccio dreta
+
+    if ((s.lletres[(i2*s.dim)+j2+dir] != '\0')&&(s.lletres[(i2*s.dim)+j2+dir] != s.p[i][j])||((j2+ll)>s.dim)) {
+         dir_dreta = false;
+
+    }
+    j++;
+    dir++;
+    }
+
+    if (dir_dreta) {
+
+     j = 0;
+     s.lletres[(i2*s.dim)+j2] = s.p[i][j];
+
+     j = 1;
+     dir = 1;
+     while (s.p[i][j] != '\n') {
+
+          if (s.lletres[(i2*s.dim)+j2+dir] == '\0') {
+
+               s.lletres[(i2*s.dim)+j2+dir] = s.p[i][j];
+
+
+          }
+          j++;
+          dir++;
+     }
+
+
+
+     dir_correcte = true;
+
+    }
+
+    }
+
+    if (direccio == 1) {
+
+    dir_avall = true;
+
+    j = 1;
+    dir = 1;
+    while ((dir_avall)&&(s.p[i][j] != '\n')) {                 // Comprovem per la direccio avall
+
+    if ((s.lletres[((i2+dir)*s.dim)+j2] != '\0')&&(s.lletres[((i2+dir)*s.dim)+j2] != s.p[i][j])) {
+         dir_avall = false;
+    }
+    j++;
+    dir++;
+    }
+
+    if (dir_avall) {
+
+     j = 0;
+     s.lletres[(i2*s.dim)+j2] = s.p[i][j];
+
+     j = 1;
+     dir = 1;
+     while (s.p[i][j] != '\n') {
+
+          if (s.lletres[((i2+dir)*s.dim)+j2] == '\0') {
+
+               s.lletres[((i2+dir)*s.dim)+j2] = s.p[i][j];
+          }
+          j++;
+          dir++;
+     }
+
+     dir_correcte = true;
+    }
+
+    }
+
+    if (direccio == 2) {
+
+    dir_esq = true;
+
+    j = 1;
+    dir = 1;
+    while ((dir_esq)&&(s.p[i][j] != '\n')) {                 // Comprovem per la direccio esq
+
+    if ((s.lletres[((i2)*s.dim)+j2-dir] != '\0')&&(s.lletres[(i2*s.dim)+j2-dir] != s.p[i][j])||(((i2*s.dim)+j2-dir)<(i2*s.dim))) {
+         dir_esq = false;
+    }
+    j++;
+    dir++;
+    }
+
+    if (dir_esq) {
+
+     j = 0;
+     s.lletres[(i2*s.dim)+j2] = s.p[i][j];
+
+     j = 1;
+     dir = 1;
+     while (s.p[i][j] != '\n') {
+
+          if (s.lletres[((i2)*s.dim)+j2-dir] == '\0') {
+
+               s.lletres[((i2)*s.dim)+j2-dir] = s.p[i][j];
+          }
+          j++;
+          dir++;
+     }
+
+     dir_correcte = true;
+
+    }
+
+    }
+
+    if (direccio == 3) {
+
+    dir_amunt = true;
+
+    j = 1;
+    dir = 1;
+    while ((dir_amunt)&&(s.p[i][j] != '\n')) {                 // Comprovem per la direccio amunt
+
+    if ((s.lletres[((i2-dir)*s.dim)+j2] != '\0')&&(s.lletres[((i2-dir)*s.dim)+j2] != s.p[i][j])||((i2-dir)<0)) {
+         dir_amunt = false;
+    }
+    j++;
+    dir++;
+    }
+
+    if (dir_amunt) {
+
+         j = 0;
+         s.lletres[(i2*s.dim)+j2] = s.p[i][j];
+
+         j = 1;
+         dir = 1;
+         while (s.p[i][j] != '\n') {
+
+           if (s.lletres[((i2-dir)*s.dim)+j2] == '\0') {
+
+               s.lletres[((i2-dir)*s.dim)+j2] = s.p[i][j];
+           }
+           j++;
+           dir++;
+        }
+
+     dir_correcte = true;
+
+    }
+
+    }
+
+
+
+    }
+
+    }
+
+
+    for (i=0; i<s.dim; i++) {
+        for (j=0; j<s.dim; j++) {
+            printf("%c", s.lletres[(i*s.dim)+j]);
+
+        }
+         printf("\n");
+    }
+
+
 
 }
 
